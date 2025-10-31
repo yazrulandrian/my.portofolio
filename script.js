@@ -110,7 +110,8 @@ function initScrollAnimations() {
             if (entry.isIntersecting) {
                 entry.target.style.opacity = '1';
                 entry.target.style.transform = 'translateY(0)';
-                entry.target.style.transition = 'all 0.6s ease';
+                // Gunakan class-based animation, bukan inline style dengan transition
+                entry.target.classList.add('animate-in');
             }
         });
     }, { 
@@ -119,8 +120,7 @@ function initScrollAnimations() {
     });
 
     animatedElements.forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(30px)';
+        el.classList.add('pre-animate');
         observer.observe(el);
     });
 }
@@ -130,39 +130,31 @@ function initHeroAnimations() {
     // Animate hero text elements dengan stagger
     const heroElements = document.querySelectorAll('.hero-badge, .hero-title, .hero-subtitle, .hero-description, .hero-stats, .hero-actions');
     heroElements.forEach((el, index) => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(30px)';
-        el.style.transition = `all 0.8s ease ${index * 0.2}s`;
+        el.classList.add('pre-animate');
         
+        // Gunakan setTimeout dengan function, bukan string
         setTimeout(() => {
-            el.style.opacity = '1';
-            el.style.transform = 'translateY(0)';
+            el.classList.add('animate-in');
         }, 100 + index * 200);
     });
     
     // Animate tech sphere
     const techSphere = document.querySelector('.tech-sphere-3d');
     if (techSphere) {
-        techSphere.style.opacity = '0';
-        techSphere.style.transform = 'scale(0.8) rotate(180deg)';
-        techSphere.style.transition = 'all 1s ease 0.5s';
+        techSphere.classList.add('pre-animate');
         
         setTimeout(() => {
-            techSphere.style.opacity = '1';
-            techSphere.style.transform = 'scale(1) rotate(0deg)';
+            techSphere.classList.add('animate-in');
         }, 600);
     }
     
     // Animate floating tech items
     const techItems = document.querySelectorAll('.tech-item');
     techItems.forEach((item, index) => {
-        item.style.opacity = '0';
-        item.style.transform = 'scale(0)';
-        item.style.transition = `all 0.5s ease ${1 + index * 0.2}s`;
+        item.classList.add('pre-animate');
         
         setTimeout(() => {
-            item.style.opacity = '1';
-            item.style.transform = 'scale(1)';
+            item.classList.add('animate-in');
         }, 1000 + index * 200);
     });
 }
@@ -182,10 +174,7 @@ function initCardHoverEffects() {
             const rotateX = (centerY - y) / 25;
             
             card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-10px)`;
-            card.style.boxShadow = `
-                0 30px 60px rgba(0, 0, 0, 0.2),
-                ${rotateY * 2}px ${rotateX * 2}px 20px rgba(0, 0, 0, 0.1)
-            `;
+            card.style.boxShadow = `0 30px 60px rgba(0, 0, 0, 0.2), ${rotateY * 2}px ${rotateX * 2}px 20px rgba(0, 0, 0, 0.1)`;
         });
         
         card.addEventListener('mouseleave', () => {
@@ -201,12 +190,12 @@ function initCardHoverEffects() {
     });
 }
 
-// Typewriter effect untuk hero title
+// Typewriter effect untuk hero title (fixed version)
 function typeWriterEffect() {
     const heroTitle = document.querySelector('.hero-title .title-line');
     if (!heroTitle) return;
     
-    const text = heroTitle.textContent;
+    const text = heroTitle.textContent || '';
     heroTitle.textContent = '';
     let i = 0;
     
@@ -214,6 +203,7 @@ function typeWriterEffect() {
         if (i < text.length) {
             heroTitle.textContent += text.charAt(i);
             i++;
+            // Gunakan function reference, bukan string
             setTimeout(type, 100);
         }
     }
@@ -222,13 +212,13 @@ function typeWriterEffect() {
     setTimeout(type, 1500);
 }
 
-// Counter animation untuk stats
+// Counter animation untuk stats (fixed version)
 function animateCounters() {
     const stats = document.querySelectorAll('.stat-number');
     
     stats.forEach(stat => {
-        const originalText = stat.textContent;
-        const target = parseInt(originalText);
+        const originalText = stat.textContent || '';
+        const target = parseInt(originalText) || 0;
         let current = 0;
         const increment = target / 50;
         const duration = 2000;
@@ -238,6 +228,7 @@ function animateCounters() {
             current += increment;
             if (current < target) {
                 stat.textContent = Math.ceil(current) + (originalText.includes('%') ? '%' : '+');
+                // Gunakan function reference
                 setTimeout(updateCounter, stepTime);
             } else {
                 stat.textContent = originalText;
@@ -264,30 +255,6 @@ function initScrollToTop() {
     scrollToTop.innerHTML = '<i class="fas fa-chevron-up"></i>';
     scrollToTop.className = 'scroll-to-top';
     document.body.appendChild(scrollToTop);
-
-    // Style the scroll to top button
-    scrollToTop.style.cssText = `
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        width: 50px;
-        height: 50px;
-        background: linear-gradient(135deg, var(--primary), var(--secondary));
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s ease;
-        z-index: 1000;
-        box-shadow: 0 8px 32px rgba(99, 102, 241, 0.3);
-        font-size: 1.2rem;
-        border: none;
-        outline: none;
-    `;
 
     scrollToTop.addEventListener('click', () => {
         window.scrollTo({
@@ -336,21 +303,10 @@ window.addEventListener('scroll', () => {
 // Touch device optimization
 if ('ontouchstart' in window) {
     document.body.classList.add('touch-device');
-    
-    // Reduce animation durations untuk touch devices
-    const style = document.createElement('style');
-    style.textContent = `
-        .touch-device * {
-            animation-duration: 0.6s !important;
-            transition-duration: 0.3s !important;
-        }
-    `;
-    document.head.appendChild(style);
 }
 
 // Preloader removal
 window.addEventListener('load', () => {
-    // Remove preloader jika ada
     const preloader = document.querySelector('.preloader');
     if (preloader) {
         preloader.style.opacity = '0';
@@ -362,7 +318,6 @@ window.addEventListener('load', () => {
 
 // Keyboard navigation support
 document.addEventListener('keydown', (e) => {
-    // Escape key untuk close mobile menu
     if (e.key === 'Escape' && navLinks && navLinks.classList.contains('active')) {
         menuToggle.classList.remove('active');
         navLinks.classList.remove('active');
